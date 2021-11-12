@@ -33,11 +33,15 @@ def get_property_tax_info(args):
     df_current = pd.read_html(r_current_year.text)
     current_taxes = df_current[1]['Total Billed'][0]
     current_excemptions = df_current[3]['Exemption Type'][0]
-    current_sale_history = df_current[4]
-    last_sold_price = current_sale_history['Gross Price'][0]
-    last_sold_sale_date = current_sale_history['Sale Date'][0]
-    last_sold_sale_date = datetime.datetime.strptime(last_sold_sale_date, "%m/%d/%Y")
-    last_sold_sale_date = datetime.datetime.strftime(last_sold_sale_date, "%Y/%m/%d")
+    if 0 <= 4 < len(df_current):
+        current_sale_history = df_current[4]
+        last_sold_price = current_sale_history['Gross Price'][0]
+        last_sold_sale_date = current_sale_history['Sale Date'][0]
+        last_sold_sale_date = datetime.datetime.strptime(last_sold_sale_date, "%m/%d/%Y")
+        last_sold_sale_date = datetime.datetime.strftime(last_sold_sale_date, "%Y/%m/%d")
+        last_sold = f"{args.address} was last sold on {last_sold_sale_date} for {last_sold_price}",
+    else:
+        last_sold = f"There is no sales data for {args.address}"
 
     df_last = pd.read_html(r_last_year.text)
     tax_rate = df_last[0][1][4].replace("Tax Rate", "").strip()
@@ -46,7 +50,7 @@ def get_property_tax_info(args):
     data = {
         "current_owner": f"The current owner of {args.address} is {current_owner}.",
         "tax_rate": f"The tax rate last year for {args.address} was {tax_rate}%.",
-        "last_sold": f"{args.address} was last sold on {last_sold_sale_date} for {last_sold_price}",
+        "last_sold": last_sold,
         "taxes": f"The taxes last year for {args.address} were {current_taxes}",
         "excemptions": f"The excemptions for {args.address} are: {current_excemptions}"
     }
