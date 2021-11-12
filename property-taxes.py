@@ -11,7 +11,10 @@ def get_property_tax_info(args):
     addr = usaddress.tag(args.address)
     house_number = addr[0]['AddressNumber']
     street_name = addr[0]['StreetName']
-    street_suffix = addr[0]['StreetNamePostType'].replace(".", "")
+    if 'StreetNamePostType' in addr[0]:
+        street_suffix = addr[0]['StreetNamePostType'].replace(".", "")
+    else:
+        street_suffix = ""
 
     d = {'property_list': '', 'house_number': house_number, 'street_name': street_name, 'street_suffix': street_suffix}
     r_current_year = requests.post(f"http://{args.county}il.devnetwedge.com/Search/ExecuteSearch", data=d)
