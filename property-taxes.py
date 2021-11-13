@@ -52,10 +52,7 @@ def get_property_tax_info(args):
         'access_key': ACCESS_KEY,
         'query': args.address
     })
-
-    print(r.url)
-
-    print(r.json())
+    
 
     house_number = r.json()['data'][0]['number']
     street_name = r.json()['data'][0]['street']
