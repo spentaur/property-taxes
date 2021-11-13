@@ -53,6 +53,10 @@ def get_property_tax_info(args):
         'query': args.address
     })
 
+    print(r.url)
+
+    print(r.json())
+
     house_number = r.json()['data'][0]['number']
     street_name = r.json()['data'][0]['street']
     county = r.json()['data'][0]['county'].replace(" County", "")
