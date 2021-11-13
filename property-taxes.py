@@ -1,3 +1,4 @@
+from json import load
 import requests
 import pandas as pd
 import argparse
@@ -5,6 +6,12 @@ import re
 from bs4 import BeautifulSoup
 import usaddress
 import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ACCESS_KEY = os.environ.get('ACCESS_KEY')
 
 def get_payment_history(x, address, current_year):
     return f"The taxes for {address} in {current_year} were {x['Total Billed'][0]}"
@@ -41,16 +48,18 @@ def get_property_tax_info(args):
     }
     
     
-    addr = usaddress.tag(args.address)
-    house_number = addr[0]['AddressNumber']
-    street_name = addr[0]['StreetName']
-    street_name = addr[0]['StreetName']
-    if 'StreetNamePreDirectional' in addr[0]:
-        street_name = f"{addr[0]['StreetNamePreDirectional']} {street_name}"
+    r = requests.get('http://api.positionstack.com/v1/forward', params={
+        'access_key': ACCESS_KEY,
+        'query': args.address
+    })
+
+    house_number = r.json()['data'][0]['number']
+    street_name = r.json()['data'][0]['street']
+    county = r.json()['data'][0]['county'].replace(" County", "")
 
     d = {'property_list': '', 'house_number': house_number, 'street_name': street_name}
 
-    r_current_year = requests.post(f"http://{args.county}il.devnetwedge.com/Search/ExecuteSearch", data=d)
+    r_current_year = requests.post(f"http://{county}il.devnetwedge.com/Search/ExecuteSearch", data=d)
 
     current_year = int(r_current_year.url.split("/")[-1])
 
@@ -87,7 +96,6 @@ def get_property_tax_info(args):
 if __name__ == "__main__":
    # Create the parser and add arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument(dest='county', help="County where property is located")
     parser.add_argument(dest='address', help="1600 w pennslyvania ave")
     parser.add_argument(dest='q', help="what data do you want")
 
